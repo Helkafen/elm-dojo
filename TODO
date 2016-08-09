@@ -1,0 +1,55 @@
+0 - Setup the project
+
+Run elm-reactor at the root directory.
+
+
+1 - Modify a label
+
+There is a "Fresh" label in the UI. It indicates that the cat gif was loaded. Change it to "Fresh!"
+Then reload the page in the browser to see the change.
+
+
+2 - Break the logic
+
+The "Fresh!" label depends on the value of the model, specifically on the field model.refreshOk.
+In the update function, set model.refresh to False when the fetch succeeded, and to True when it failed.
+
+The model contains all the mutable state of the application. It can only be updated in the update function.
+
+
+3 - Make the title smaller
+
+The title is wrapped in an H1 tag: make it smaller.
+
+The view function produces a full virtual DOM every time the model is updated, like ReactJS.
+
+
+4 - Display all the directories by default
+
+The model contains a flag that controls whether we display everything or only the errors. Change the default behaviour.
+
+Then follow all the occurences of displayErrorsOnly and ToggleErrorDisplay. This is a basic control loop.
+
+
+5 - Make the gif change every 5 seconds
+
+Subscriptions are used to send messages to the update function (in this case, "Tick").
+We can declare a subscription to a timer, the mouse coordinates, the keyboard, websockets...
+
+When the Tick message is received, it triggers a Command (i.e a side effect) that fetches some Url.
+After the HTTP call, the return value is wrapped in a message (FetchSucceed or FetchFail).
+See getRandomGif and decodeGifUrl.
+
+
+6 - Add a field to the FtpStatus
+
+The FtpStatus case class contains 2 fields. Add a third one and fix the compile errors in allStatus.
+Then display it in ftpStatusDiv.
+
+
+7 - Set a default query string in the search box
+
+You need to:
+- import the withDefault function from the Maybe module
+- Change the initial model value to: Just "iheart"
+- Replace a placeholder in the view function with a function call: (withDefault "Search" model.query)
