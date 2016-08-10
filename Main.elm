@@ -10,6 +10,8 @@ import Time exposing (Time, second)
 import Json.Decode as Json
 import Http
 import Task
+import Svg
+import Svg.Attributes exposing (cx, cy, r, height, width, viewBox, color, fill)
 
 type Status = Good | Bad | Warning | Empty
 
@@ -118,10 +120,10 @@ statusRow title xs = tr [] ([td [class "StatusTitle"] [text title]] ++ map statu
 
 mouseOverCell cl status =
   let tooltip = (toString status.numberOfLines) ++ " lines from " ++ (toString status.numberOfFiles) ++ " files"
-  in td [class cl, onMouseOver (Over status), Html.Attributes.title tooltip] [text ""]
+  in td [onMouseOver (Over status), Html.Attributes.title tooltip] [withStatusDot status.status [text ""]]
 
 statusCell status = case status.status of
-  Empty -> td [class "Empty", Html.Attributes.title "No sync this day"] [text ""]
+  Empty -> td [Html.Attributes.title "No sync this day"] [withStatusDot Empty [text ""]]
   other -> mouseOverCell (statusToClass other) status
 
 statusToClass : Status -> String
@@ -134,7 +136,7 @@ ftpStatusDiv ftpUrl ftpStatus =
     Nothing -> "No speed"
   in
     div [ class "FtpStatus" ] [
-      div [class (statusToClass ftpStatus.status)] [text (ftpUrl ++ ". " ++ speedString)]
+      withStatusDot ftpStatus.status [text (ftpUrl ++ ". " ++ speedString)]
     ]
 
 
@@ -203,7 +205,7 @@ view model =
       css "css/style.css",
       css "css/font-awesome.min.css",
       css "css/bootstrap.min.css",
-      h1 [ class "Title" ] [text "Log collection"],
+      h1 [] [text "Log collection"],
       case model.refreshOk of
         False -> p [] [ text "Not fresh" ]
         True -> p [] [ text "Fresh" ],
@@ -223,6 +225,15 @@ view model =
       ]
   ]
 
+withDot colour x = div [] ([
+  Svg.svg [ width "20", height "20", viewBox "0 0 20 20" ] [ Svg.circle [ cx "10", cy "10", r "10", fill colour ] [text ""]]
+  ] ++ x)
+
+withStatusDot s = case s of
+  Good -> withDot "green"
+  Bad -> withDot "red"
+  Warning -> withDot "orange"
+  Empty -> withDot "blue"
 
 css : String -> Html msg
 css path =

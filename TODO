@@ -1,6 +1,6 @@
 0 - Setup the project
 
-Installers for Mac and windows: http://elm-lang.org/install
+For mac: brew install elm
 For linux: sudo npm install -g elm
 
 Run elm-reactor at the root directory.
