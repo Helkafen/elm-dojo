@@ -13,11 +13,21 @@ Some syntax:
 -- An enumeration
 type Status = Good | Bad | Warning | Empty
 
--- A "case class" with two fields
+-- A "case class" with two fields. Maybe is like scala's Option
 type alias FtpStatus =
   { status : Status
   , downloadSpeed : Maybe Float
   }
+
+-- Find the most recent date in a list of DetailedStatus
+lastDate : List DetailedStatus -> Maybe Date
+lastDate statusList = List.maximum (map .date statusList)
+
+Main functions:
+view : Model -> Html Msg
+update : Msg -> Model -> (Model, Cmd Msg)
+subscriptions : Model -> Sub Msg
+init : ( Model, Cmd Msg )
 
 
 
@@ -46,7 +56,7 @@ The view function produces a full virtual DOM every time the model is updated, l
 
 The model contains a flag that controls whether we display everything or only the errors. Change the default behaviour.
 
-Then follow all the occurences of displayErrorsOnly and ToggleErrorDisplay. This is a basic control loop.
+If you find all the uses of displayErrorsOnly and ToggleErrorDisplay, they form a basic control loop (UI -> Message -> Update of the model -> UI).
 
 
 5 - Make the gif change every 5 seconds

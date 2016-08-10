@@ -12,7 +12,7 @@ import Http
 import Task
 import Svg
 import Svg.Attributes exposing (cx, cy, r, height, width, viewBox, color, fill)
-import Maybe exposing (withDefault)
+import Maybe
 
 type Status = Good | Bad | Warning | Empty
 
@@ -35,7 +35,7 @@ type alias AllStatus = Dict String (FtpStatus, Dict String (List DetailedStatus)
 
 
 lastDate : List DetailedStatus -> Maybe Date
-lastDate xs = List.maximum (map .date xs)
+lastDate statusList = List.maximum (map .date statusList)
 
 statusOfDay : List DetailedStatus -> Date -> DetailedStatus
 statusOfDay listOfStatus d =
@@ -44,7 +44,7 @@ statusOfDay listOfStatus d =
     firstMatch = List.head list
     defaultStatus = { status=Empty, date=d, numberOfLines=0, numberOfFiles=0, filesInError=[] }
   in
-    withDefault defaultStatus firstMatch
+    Maybe.withDefault defaultStatus firstMatch
 
 normalize : Date -> Int -> List DetailedStatus -> List DetailedStatus
 normalize maxDate width listOfStatus =
@@ -122,18 +122,15 @@ decodeGifUrl : Json.Decoder String
 decodeGifUrl = Json.at ["data", "image_url"] Json.string
 
 -- VIEW
-statusRow title xs = tr [] ([td [class "StatusTitle"] [text title]] ++ map statusCell xs)
+statusRow : String -> List DetailedStatus -> Html Msg
+statusRow title statusList = tr [] ([td [class "StatusTitle"] [text title]] ++ map statusCell statusList)
 
-mouseOverCell cl status =
-  let tooltip = (toString status.numberOfLines) ++ " lines from " ++ (toString status.numberOfFiles) ++ " files"
+statusCell : DetailedStatus -> Html Msg
+statusCell status =
+  let tooltip = case status.status of
+    Empty -> "No sync this day"
+    other -> (toString status.numberOfLines) ++ " lines from " ++ (toString status.numberOfFiles) ++ " files"
   in td [onMouseOver (Over status), Html.Attributes.title tooltip] [withStatusDot status.status [text ""]]
-
-statusCell status = case status.status of
-  Empty -> td [Html.Attributes.title "No sync this day"] [withStatusDot Empty [text ""]]
-  other -> mouseOverCell (statusToClass other) status
-
-statusToClass : Status -> String
-statusToClass s = toString s
 
 ftpStatusDiv : String -> FtpStatus -> Html a
 ftpStatusDiv ftpUrl ftpStatus =
@@ -150,7 +147,7 @@ ftpStatusDiv ftpUrl ftpStatus =
 -- Each table row represents a FTP/FG history. Each column represents a day.
 statusTable : Date -> Int -> Dict String (List DetailedStatus) -> Html Msg
 statusTable maxDate width histories = let
-  rows = map (\(fg,xs) -> statusRow fg (normalize maxDate width xs)) (Dict.toList histories)
+  rows = map (\(fg,history) -> statusRow fg (normalize maxDate width history)) (Dict.toList histories)
   in table [] rows
 
 -- Create the status view for an FTP (ftp status + ftp/fg status)
@@ -162,6 +159,7 @@ statusTableWithFtpStatus maxDate width ftpUrl ftpStatus fgStatus =
   ]
 
 -- Create one section by FTP
+mkAllStatusTablesWithFtpStatus : Date -> Int -> AllStatus -> Html Msg
 mkAllStatusTablesWithFtpStatus maxDate width allStatus =
   let
     statusTableByFtp =
@@ -183,7 +181,7 @@ statusDetailsDiv status =
       ]
 
 hasError : List DetailedStatus -> Bool
-hasError xs = List.any (\status -> status.status == Bad || status.status == Warning) xs
+hasError statusList = List.any (\status -> status.status == Bad || status.status == Warning) statusList
 
 filterRows : (String -> FtpStatus -> String -> List DetailedStatus -> Bool) -> AllStatus -> AllStatus
 filterRows pred allStatus =
