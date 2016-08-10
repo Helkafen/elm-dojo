@@ -102,8 +102,8 @@ update msg model =
   case msg of
     Over status -> ({ model | status = Just status }, Cmd.none)
     ToggleErrorDisplay -> ({ model | displayErrorsOnly = not model.displayErrorsOnly }, Cmd.none)
-    Search string -> ({ model | query = if (String.length string > 0) then Just(string) else Nothing }, Cmd.none)
-    Tick -> ({ model | days = model.days+1 }, getRandomGif "cat")
+    Search searchString -> ({ model | query = if (String.length searchString > 0) then Just(searchString) else Nothing }, Cmd.none)
+    Tick -> (model, getRandomGif "cat")
     FetchSucceed newUrl -> ({ model | gifUrl = newUrl, refreshOk=True }, Cmd.none)
     FetchFail _ -> ({ model | refreshOk=False }, Cmd.none)
 
@@ -233,7 +233,7 @@ withDot colour x = div [] ([
   Svg.svg [ width "20", height "20", viewBox "0 0 20 20" ] [ Svg.circle [ cx "10", cy "10", r "10", fill colour ] [text ""]]
   ] ++ x)
 
-withStatusDot s = case s of
+withStatusDot status = case status of
   Good -> withDot "green"
   Bad -> withDot "red"
   Warning -> withDot "orange"

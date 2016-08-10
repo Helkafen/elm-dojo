@@ -72,12 +72,11 @@ See getRandomGif and decodeGifUrl.
 6 - Add a field to the FtpStatus
 
 The FtpStatus case class contains 2 fields. Add a third one and fix the compile errors in allStatus.
-Then display it in ftpStatusDiv.
+Then display it in the UI.
 
 
 7 - Set a default query string in the search box
 
 You need to:
-- import the withDefault function from the Maybe module
 - Change the initial model value to: Just "iheart"
-- Replace a placeholder in the view function with a function call: (withDefault "Search" model.query)
+- Add a "value" attribute to the search box, using the following: (Maybe.withDefault "" model.query)
