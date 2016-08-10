@@ -12,6 +12,7 @@ import Http
 import Task
 import Svg
 import Svg.Attributes exposing (cx, cy, r, height, width, viewBox, color, fill)
+import Maybe exposing (withDefault)
 
 type Status = Good | Bad | Warning | Empty
 
@@ -37,13 +38,18 @@ lastDate : List DetailedStatus -> Maybe Date
 lastDate xs = List.maximum (map .date xs)
 
 statusOfDay : List DetailedStatus -> Date -> DetailedStatus
-statusOfDay xs d = case List.filter (\x -> x.date == d) xs of
-  [] -> { status=Empty, date=d, numberOfLines=0, numberOfFiles=0, filesInError=[] }
-  x::xs -> x
+statusOfDay listOfStatus d =
+  let
+    list = List.filter (\x -> x.date == d) listOfStatus
+    firstMatch = List.head list
+    defaultStatus = { status=Empty, date=d, numberOfLines=0, numberOfFiles=0, filesInError=[] }
+  in
+    withDefault defaultStatus firstMatch
 
 normalize : Date -> Int -> List DetailedStatus -> List DetailedStatus
-normalize maxDate width xs =
-    map (statusOfDay xs) [(maxDate-width+1)..maxDate]
+normalize maxDate width listOfStatus =
+  let days = [(maxDate-width+1)..maxDate]
+  in map (statusOfDay listOfStatus) days
 
 -- Static data. We need to fetch this from the backend
 allStatus : AllStatus
@@ -85,7 +91,7 @@ model : Model
 model = { days=18, status=Nothing, displayErrorsOnly=True, query=Nothing, gifUrl="waiting.gif", refreshOk=False }
 
 init : ( Model, Cmd Msg )
-init = ( model, getRandomGif "cat" )
+init = ( model, getRandomGif "cat" ) --The application will execute this command (getRandomGif) right after booting
 
 
 -- UPDATE

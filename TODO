@@ -4,6 +4,21 @@ For mac: brew install elm
 For linux: sudo npm install -g elm
 
 Run elm-reactor at the root directory.
+You can also build the project in the command line: elm-make Main.elm --output index.html
+
+Some syntax:
+
+-- A comment
+
+-- An enumeration
+type Status = Good | Bad | Warning | Empty
+
+-- A "case class" with two fields
+type alias FtpStatus =
+  { status : Status
+  , downloadSpeed : Maybe Float
+  }
+
 
 
 1 - Modify a label
